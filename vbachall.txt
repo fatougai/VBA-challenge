@@ -1,0 +1,111 @@
+Attribute VB_Name = "Module2"
+Sub multistockanalysis():
+ 
+'Define items and worksheets as variables
+Dim Ticker As String
+Dim Yearly_Change As Double
+Dim Percent_Change As String
+Dim Total_Stock_Volume As Double
+Dim Summary_Row As Integer
+Dim Opening As Double
+Dim Closing As Double
+Dim ws As Worksheet
+Dim greatestincr As Double
+Dim greatestdecrease As Double
+Dim greatestvolume As Double
+
+'create for loop through all worksheets
+For Each ws In ThisWorkbook.Sheets
+        ws.Activate
+ws.Select Range("I1").Value = "Ticker"
+
+'create column and row headers
+Range("J1").Value = "Yearly Change"
+Range("K1").Value = "Percent Change"
+Range("L1").Value = "Total Stock Volume"
+Range("P1").Value = "Ticker"
+Range("Q1").Value = "Value"
+Range("O2").Value = "Greatest % Increase"
+Range("O3").Value = "Greatest % Decrease"
+Range("O4").Value = "Greatest Total Volume"
+
+
+Total_Stock_Volume = 0
+Summary_Row = 2
+Yearly_Change = 0
+Range("J:J").Interior.ColorIndex = 0
+'assign lastrow and for loop throug all rows with data
+Lastrow = Cells(Rows.Count, 1).End(xlUp).Row
+For i = 2 To Lastrow
+'calculate open price
+If Cells(i - 1, 1).Value <> Cells(i, 1).Value Then
+Opening = Cells(i, 3).Value
+
+End If
+'set ticker and assign cell
+If Cells(i + 1, 1).Value <> Cells(i, 1).Value Then
+Ticker = Cells(i, 1).Value
+Range("I" & Summary_Row).Value = Ticker
+'set assign and RESET total stock volume
+Total_Stock_Volume = Total_Stock_Volume + Cells(i, 7).Value
+Range("L" & Summary_Row).Value = Total_Stock_Volume
+Total_Stock_Volume = 0
+
+'find and assign greatest percent increase, and format
+greatestincr = Application.WorksheetFunction.Max(Range("k:k"))
+Range("Q2").Value = Format(greatestincr, "Percent")
+If greatestincr = Range("K" & Summary_Row).Value Then
+Range("P2").Value = Range("I" & Summary_Row).Value
+End If
+
+'locate max volume and include corresponding ticker
+greatestvolume = Application.WorksheetFunction.Max(Range("L:L"))
+    Range("Q4").Value = greatestvolume
+    If greatestvolume = Range("L" & Summary_Row).Value Then
+    Range("P4").Value = Range("I" & Summary_Row).Value
+    End If
+    
+    'greatest % decrease and format with ticker
+    greatestdecrease = Application.WorksheetFunction.Min(Range("k:k"))
+    Range("Q3").Value = Format(greatestdecrease, "Percent")
+    If greatestdecrease = Range("K" & Summary_Row).Value Then
+    Range("P3").Value = Range("I" & Summary_Row).Value
+    End If
+    
+    'locate close price colum
+Closing = Cells(i, 6).Value
+'calculate and print yearly change
+Yearly_Change = Closing - Opening
+Range("J" & Summary_Row).Value = Yearly_Change
+'calculate and format percent change
+Percent_Change = FormatPercent((Closing / Opening - 1), vbTrue)
+Range("K" & Summary_Row).Value = Percent_Change
+
+'conditional formatting for yearly change
+If Yearly_Change < 0 Then
+Range("J" & Summary_Row).Interior.Color = vbRed
+Else
+Range("J" & Summary_Row).Interior.Color = vbGreen
+
+End If
+'all the resetting
+Summary_Row = Summary_Row + 1
+Yearly_Change = 0
+Percent_Change = 0
+Range("J" & Summary_Row).Interior.ColorIndex = 0
+Else
+Total_Stock_Volume = Total_Stock_Volume + Cells(i, 7).Value
+
+End If
+
+
+
+
+
+
+Next i
+Next
+End Sub
+
+
+
